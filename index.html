@@ -11,13 +11,21 @@
 
 <body class="bg-blue-50 min-h-screen p-4 font-sans text-gray-800">
 
-    <div class="max-w-md mx-auto bg-white rounded-2xl shadow-lg overflow-hidden">
-        <div class="bg-blue-500 text-white p-6 text-center">
+    <div class="max-w-md mx-auto shadow-lg overflow-hidden rounded-2xl">
+        <div class="bg-blue-500 text-white p-6 text-center rounded-t-2xl">
             <h1 class="text-2xl font-bold mb-2">우리 가족 생일 알림이 🎂</h1>
-            <p class="text-blue-100 text-sm">올해 생일, 몇 일 남았을까?</p>
+            <p class="text-blue-100 text-sm">올해 생일, 며칠 남았을까?</p>
         </div>
 
-        <div class="p-6 border-b border-gray-100">
+        <div class="p-6 bg-gray-50 min-h-[300px]">
+            <h2 class="text-lg font-bold text-gray-700 mb-4">다가오는 생일 목록</h2>
+            <div id="birthdayList" class="space-y-3">
+                <p class="text-center text-gray-400 text-sm py-4">데이터를 불러오는 중입니다...</p>
+            </div>
+        </div>
+
+        <div class="p-6 bg-white border-t border-gray-200 rounded-b-2xl">
+            <h2 class="text-sm font-bold text-gray-500 mb-4">새로운 가족 추가하기</h2>
             <div class="flex flex-col space-y-3">
                 <input type="text" id="nameInput" placeholder="이름 (예: 첫째 아들, 아내)"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
@@ -34,50 +42,43 @@
 
                 <button id="addBtn"
                     class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
-                    가족 생일 추가하기 ➕
+                    등록하기 ➕
                 </button>
-            </div>
-        </div>
-
-        <div class="p-6 bg-gray-50">
-            <h2 class="text-lg font-bold text-gray-700 mb-4">다가오는 생일 목록</h2>
-            <div id="birthdayList" class="space-y-3">
-                <p class="text-center text-gray-400 text-sm py-4">데이터를 불러오는 중입니다...</p>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // 1. Firebase 설정 (팀장님의 파이어베이스 메모장 코드로 바꿔주세요!)
+        // 1. Firebase 설정 (팀장님의 진짜 열쇠로 바꿔주세요!)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "여기에_팀장님의_API_KEY를_넣으세요",
-            authDomain: "여기에_팀장님의_AUTH_DOMAIN을_넣으세요",
-            projectId: "여기에_팀장님의_PROJECT_ID를_넣으세요",
-            storageBucket: "...",
-            messagingSenderId: "...",
-            appId: "..."
+            apiKey: "AIzaSyCTwOAC_LrrKH8CKepUOTf0pyd9qRv4y_8",
+            authDomain: "cnation-project.firebaseapp.com",
+            projectId: "cnation-project",
+            storageBucket: "cnation-project.firebasestorage.app",
+            messagingSenderId: "1004154104261",
+            appId: "1:1004154104261:web:0eac4c7ded38262ae5c3ac",
+            measurementId: "G-7PW1NSP5EQ"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // 어제 정한 완벽한 명명 규칙 적용!
-        const collectionName = "family-birthdays";
+        // 정해진 네이밍 룰 적용!
+        const collectionName = "cnation-family-birthdays";
 
         // 2. D-Day 계산 및 음력/양력 변환 함수
         function calculateBirthdayInfo(birthDateStr, isLunar) {
             const today = new Date();
-            today.setHours(0, 0, 0, 0); // 시간 초기화 (정확한 날짜 계산을 위해)
+            today.setHours(0, 0, 0, 0);
 
             const [birthYear, birthMonth, birthDay] = birthDateStr.split('-').map(Number);
             const currentYear = today.getFullYear();
 
             let thisYearBirthdaySolar;
 
-            // 음력이면 올해의 양력 날짜로 변환
             if (isLunar) {
                 const lunarDate = Lunar.fromYmd(currentYear, birthMonth, birthDay);
                 const solarDateObj = lunarDate.getSolar();
@@ -86,12 +87,12 @@
                 thisYearBirthdaySolar = new Date(currentYear, birthMonth - 1, birthDay);
             }
 
-            // D-Day 계산
             const diffTime = thisYearBirthdaySolar - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             let dDayText = "";
             let textColorClass = "";
+            let opacityClass = "opacity-100"; // 지난 생일은 살짝 흐리게 처리
 
             if (diffDays === 0) {
                 dDayText = "D-Day 🎉";
@@ -102,12 +103,13 @@
             } else {
                 dDayText = `D+${Math.abs(diffDays)} (지남)`;
                 textColorClass = "text-gray-400";
+                opacityClass = "opacity-60"; // 시각적으로 덜 중요하게 보이기
             }
 
-            // 화면에 보여줄 날짜 포맷 (예: 2026년 5월 15일)
             const displayDate = `${thisYearBirthdaySolar.getFullYear()}년 ${thisYearBirthdaySolar.getMonth() + 1}월 ${thisYearBirthdaySolar.getDate()}일`;
 
-            return { dDayText, textColorClass, displayDate };
+            // diffDays 값을 리턴하여 정렬 알고리즘에서 사용할 수 있게 함
+            return { dDayText, textColorClass, displayDate, diffDays, opacityClass };
         }
 
         // 3. 생일 추가 기능
@@ -121,51 +123,69 @@
                 return;
             }
 
-            // Firestore에 데이터 저장
             await addDoc(collection(db, collectionName), {
                 name: name,
                 birthDate: date,
-                isLunar: isLunar,
-                timestamp: new Date()
+                isLunar: isLunar
             });
 
-            // 입력창 초기화
             document.getElementById('nameInput').value = '';
             document.getElementById('dateInput').value = '';
             document.getElementById('isLunar').checked = false;
         });
 
-        // 4. 실시간 생일 목록 불러오기 (카카오톡처럼 실시간!)
-        const q = query(collection(db, collectionName), orderBy("timestamp", "asc"));
-
-        onSnapshot(q, (snapshot) => {
+        // 4. 데이터 불러오기 및 **스마트 정렬**
+        onSnapshot(collection(db, collectionName), (snapshot) => {
             const listDiv = document.getElementById('birthdayList');
-            listDiv.innerHTML = ''; // 기존 목록 지우기
+            listDiv.innerHTML = '';
 
             if (snapshot.empty) {
-                listDiv.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">등록된 생일이 없습니다. 가족을 추가해 보세요!</p>';
+                listDiv.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">등록된 생일이 없습니다. 아래에서 가족을 추가해 보세요!</p>';
                 return;
             }
 
+            // 데이터를 배열로 1차 수집
+            let birthdays = [];
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
-                const id = docSnap.id;
-
-                // D-Day 및 양력 날짜 계산
                 const info = calculateBirthdayInfo(data.birthDate, data.isLunar);
+                birthdays.push({ id: docSnap.id, data: data, info: info });
+            });
+
+            // 팀장님이 기획하신 정렬 알고리즘!
+            birthdays.sort((a, b) => {
+                const diffA = a.info.diffDays;
+                const diffB = b.info.diffDays;
+                const isAUpcoming = diffA >= 0;
+                const isBUpcoming = diffB >= 0;
+
+                if (isAUpcoming && isBUpcoming) {
+                    return diffA - diffB; // 둘 다 남았으면, 적게 남은 사람부터 (오름차순)
+                } else if (!isAUpcoming && !isBUpcoming) {
+                    return diffB - diffA; // 둘 다 지났으면, 최근에 지난 사람부터 (내림차순)
+                } else if (isAUpcoming && !isBUpcoming) {
+                    return -1; // 남은 사람이 무조건 위로
+                } else {
+                    return 1; // 지난 사람은 아래로
+                }
+            });
+
+            // 정렬된 순서대로 화면에 그리기
+            birthdays.forEach((item) => {
+                const { id, data, info } = item;
                 const lunarTag = data.isLunar ? '<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full ml-2">음력</span>' : '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full ml-2">양력</span>';
 
-                // 화면에 그려질 카드 모양 HTML
+                // 지난 생일은 카드를 살짝 투명하게(opacity) 만들어서 구분감 주기
                 const itemHtml = `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md ${info.opacityClass}">
                         <div>
                             <div class="flex items-center mb-1">
                                 <span class="font-bold text-gray-800 text-lg">${data.name}</span>
                                 ${lunarTag}
                             </div>
                             <div class="text-xs text-gray-500">
-                                원래 생일: ${data.birthDate} <br>
-                                올해 생일: ${info.displayDate}
+                                원래: ${data.birthDate} <br>
+                                올해: ${info.displayDate}
                             </div>
                         </div>
                         <div class="flex flex-col items-end">
@@ -178,7 +198,7 @@
             });
         });
 
-        // 5. 삭제 기능 (전역 함수로 만들기)
+        // 5. 삭제 기능
         window.deleteBirthday = async (id) => {
             if (confirm("이 생일 기록을 삭제하시겠습니까?")) {
                 await deleteDoc(doc(db, collectionName, id));
