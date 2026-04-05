@@ -1,105 +1,173 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html class="light" lang="ko">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>우리 가족 생일 알림이 🎂</title>
 
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#ff6b6b">
+    <meta name="theme-color" content="#f9faf8">
     <link rel="icon" type="image/x-icon" href="./favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="./android-chrome-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="./android-chrome-512x512.png">
 
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="생일 알림">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700;900&family=Manrope:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet" />
+
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.js"></script>
 
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "background": "#f9faf8", "on-secondary-container": "#5a6745", "surface-container-lowest": "#ffffff",
+                        "secondary-fixed": "#dae8be", "tertiary-fixed": "#d1e8dc", "secondary-container": "#d7e5bb",
+                        "on-tertiary": "#ffffff", "outline-variant": "#c1c8c2", "surface-container-high": "#e7e8e6",
+                        "error": "#ba1a1a", "on-primary": "#ffffff", "primary-fixed": "#c1ecd4",
+                        "surface-container": "#edeeec", "on-primary-container": "#86af99", "on-secondary": "#ffffff",
+                        "outline": "#717973", "on-tertiary-fixed-variant": "#374b42", "surface-container-low": "#f3f4f2",
+                        "on-error-container": "#93000a", "surface-container-highest": "#e2e3e1", "secondary-fixed-dim": "#becca3",
+                        "surface-variant": "#e2e3e1", "primary-fixed-dim": "#a5d0b9", "on-primary-fixed": "#002114",
+                        "tertiary-fixed-dim": "#b5ccc0", "surface-bright": "#f9faf8", "surface-tint": "#3f6653",
+                        "on-error": "#ffffff", "primary": "#012d1d", "secondary": "#566342", "surface": "#f9faf8",
+                        "on-background": "#191c1b", "on-surface": "#191c1b", "tertiary-container": "#2c4038",
+                        "surface-dim": "#d9dad8", "inverse-surface": "#2e3130", "on-surface-variant": "#414844",
+                        "inverse-primary": "#a5d0b9", "on-secondary-fixed-variant": "#3f4b2c", "on-primary-fixed-variant": "#274e3d",
+                        "on-tertiary-fixed": "#0b1f18", "inverse-on-surface": "#f0f1ef", "primary-container": "#1b4332",
+                        "tertiary": "#162a22", "error-container": "#ffdad6", "on-tertiary-container": "#95aba1",
+                        "on-secondary-fixed": "#141f05"
+                    },
+                    "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "2xl": "1.5rem", "full": "9999px" },
+                    "fontFamily": {
+                        "headline": ["Noto Serif KR", "Noto Serif", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
     <style>
-        /* 알림 배너 */
-        #notificationBanner {
-            display: none;
-            position: fixed;
-            bottom: 1rem;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 9999;
-            width: calc(100% - 2rem);
-            max-width: 28rem;
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        body {
+            font-family: 'Manrope', sans-serif;
+            background-color: #f9faf8;
+            min-height: max(884px, 100dvh);
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Noto Serif KR', 'Noto Serif', serif;
+        }
+
+        .editorial-gradient {
+            background: radial-gradient(circle at top right, #1B4332 0%, #012d1d 100%);
         }
     </style>
 </head>
 
-<body class="bg-blue-50 min-h-screen p-4 font-sans text-gray-800">
+<body id="cnation-app-container" class="text-on-surface">
+    <header class="sticky top-0 z-50 w-full bg-[#f9faf8]/90 backdrop-blur-md shadow-none">
+        <div class="flex justify-between items-center px-6 h-16 w-full max-w-7xl mx-auto">
+            <div class="flex items-center gap-3">
+                <span class="material-symbols-outlined text-[#012d1d]" data-icon="family_history">family_history</span>
+                <h1 class="font-['Noto_Serif'] text-xl font-bold tracking-tight text-[#012d1d]">Celebrations</h1>
+            </div>
+            <nav class="hidden md:flex gap-8">
+                <a class="text-[#012d1d] font-bold hover:bg-[#d7e5bb]/50 transition-colors px-3 py-2 rounded-xl"
+                    href="#">Timeline</a>
+                <a class="text-[#566342] hover:bg-[#d7e5bb]/50 transition-colors px-3 py-2 rounded-xl"
+                    href="#addNewSection">Add New</a>
+            </nav>
+        </div>
+    </header>
 
-    <!-- 알림 권한 요청 배너 -->
-    <div id="notificationBanner" class="bg-yellow-50 border border-yellow-300 rounded-2xl shadow-lg p-4">
-        <div class="flex items-start gap-3">
-            <span class="text-2xl">🔔</span>
-            <div class="flex-1">
-                <p class="font-bold text-gray-800 text-sm">생일 하루 전 알림 받기</p>
-                <p class="text-xs text-gray-500 mt-1">생일 전날 오전 8시에 알림을 드려요.<br>
-                <span class="text-yellow-600 font-medium">📱 iPhone은 홈화면에 추가해야 알림이 작동합니다.</span></p>
-                <div class="flex gap-2 mt-3">
-                    <button id="allowNotifBtn"
-                        class="flex-1 bg-blue-500 hover:bg-blue-600 text-white text-sm font-bold py-2 px-3 rounded-lg transition">
-                        알림 허용하기 ✅
-                    </button>
-                    <button id="dismissNotifBtn"
-                        class="text-gray-400 hover:text-gray-600 text-sm py-2 px-3 rounded-lg border border-gray-200 transition">
-                        나중에
-                    </button>
+    <main class="max-w-7xl mx-auto px-6 pt-8 pb-32">
+        <section class="mb-12 relative overflow-hidden rounded-2xl editorial-gradient p-12 text-on-primary">
+            <div class="relative z-10 max-w-2xl">
+                <span class="font-label text-sm uppercase tracking-[0.2em] text-on-primary-container mb-4 block">Archive
+                    01</span>
+                <h2 class="text-4xl md:text-5xl font-black mb-6 leading-tight">우리 가족 생일 알림이 🎂</h2>
+                <p class="font-body text-on-primary-container text-lg max-w-md opacity-90">사소한 순간들이 모여 영원한 유산이 됩니다. 소중한
+                    가족의 기념일을 기록하고 기억하세요.</p>
+            </div>
+            <div class="absolute -right-20 -bottom-20 opacity-10">
+                <span class="material-symbols-outlined text-[300px]" data-icon="forest">forest</span>
+            </div>
+        </section>
+
+        <div id="birthdayList" class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
+            <div class="md:col-span-12">
+                <p class="text-center text-outline font-medium text-sm py-12">데이터를 불러오는 중입니다...</p>
+            </div>
+        </div>
+
+        <section id="addNewSection" class="mt-20">
+            <div
+                class="bg-[#1B4332] rounded-2xl p-8 md:p-10 flex flex-col xl:flex-row items-center justify-between text-on-primary gap-8 shadow-2xl">
+                <div class="w-full xl:w-auto text-center xl:text-left shrink-0">
+                    <h3 class="text-2xl font-bold mb-2">새로운 기념일 추가하기</h3>
+                    <p class="opacity-80 font-body text-sm md:text-base">우리 가족만의 소중한 기록을 추가해 보세요.</p>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <div class="max-w-md mx-auto shadow-lg overflow-hidden rounded-2xl">
-        <div class="bg-blue-500 text-white p-6 text-center rounded-t-2xl">
-            <h1 class="text-2xl font-bold mb-2">우리 가족 생일 알림이 🎂</h1>
-            <p class="text-blue-100 text-sm">올해 생일, 며칠 남았을까?</p>
-            <!-- 알림 상태 표시 -->
-            <div id="notifStatus" class="mt-3 text-xs text-blue-200 hidden">
-                🔔 알림이 설정되어 있습니다
-            </div>
-        </div>
+                <div class="flex flex-col sm:flex-row flex-wrap gap-4 w-full justify-center xl:justify-end">
+                    <div class="bg-primary-container p-1 rounded-xl flex items-center px-4 w-full sm:w-[220px]">
+                        <span class="material-symbols-outlined text-on-primary-container opacity-60 mr-2 text-sm"
+                            data-icon="edit">edit</span>
+                        <input id="nameInput"
+                            class="bg-transparent border-none focus:ring-0 text-on-primary placeholder:text-on-primary-container w-full py-3 text-sm font-body outline-none"
+                            placeholder="누구의 기념일인가요?" type="text" />
+                    </div>
 
-        <div class="p-6 bg-gray-50 min-h-[300px]">
-            <h2 class="text-lg font-bold text-gray-700 mb-4">다가오는 생일 목록</h2>
-            <div id="birthdayList" class="space-y-3">
-                <p class="text-center text-gray-400 text-sm py-4">데이터를 불러오는 중입니다...</p>
-            </div>
-        </div>
+                    <div class="bg-primary-container p-1 rounded-xl flex items-center px-4 w-full sm:w-[180px]">
+                        <span class="material-symbols-outlined text-on-primary-container opacity-60 mr-2 text-sm"
+                            data-icon="calendar_today">calendar_today</span>
+                        <input id="dateInput"
+                            class="bg-transparent border-none focus:ring-0 text-on-primary w-full py-3 text-sm font-body outline-none"
+                            type="date" style="color-scheme: dark;" />
+                    </div>
 
-        <div class="p-6 bg-white border-t border-gray-200 rounded-b-2xl">
-            <h2 class="text-sm font-bold text-gray-500 mb-4">새로운 가족 추가하기</h2>
-            <div class="flex flex-col space-y-3">
-                <input type="text" id="nameInput" placeholder="이름 (예: 첫째 아들, 아내)"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
-
-                <div class="flex space-x-2 items-center">
-                    <input type="date" id="dateInput"
-                        class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <label
-                        class="flex items-center space-x-2 text-sm font-medium text-gray-600 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer">
-                        <input type="checkbox" id="isLunar" class="w-4 h-4 text-blue-500 rounded focus:ring-blue-400">
-                        <span>음력</span>
+                        class="flex items-center justify-center space-x-2 px-4 py-3 rounded-xl bg-primary-container cursor-pointer w-full sm:w-auto hover:bg-[#2c4038] transition-colors">
+                        <input type="checkbox" id="isLunar"
+                            class="rounded text-surface-container-lowest focus:ring-0 border-none w-4 h-4 bg-primary cursor-pointer">
+                        <span class="text-sm font-bold text-on-primary">음력</span>
                     </label>
-                </div>
 
-                <button id="addBtn"
-                    class="w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md">
-                    등록하기 ➕
-                </button>
+                    <button id="addBtn"
+                        class="w-full sm:w-auto bg-surface-container-lowest text-primary px-8 py-4 rounded-xl font-bold hover:bg-secondary-container transition-all active:scale-95 duration-200">
+                        등록하기
+                    </button>
+                </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
+
+    <nav
+        class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-[#f9faf8]/90 backdrop-blur-md rounded-t-[1.5rem] shadow-[0_-4px_40px_rgba(1,45,29,0.05)]">
+        <a class="flex flex-col items-center justify-center bg-[#1B4332] text-[#f9faf8] rounded-[1.5rem] px-5 py-2 active:scale-90 transition-transform duration-300"
+            href="#">
+            <span class="material-symbols-outlined" data-icon="calendar_today">calendar_today</span>
+            <span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-semibold mt-1">Timeline</span>
+        </a>
+        <a class="flex flex-col items-center justify-center text-[#566342] px-5 py-2 hover:text-[#012d1d] active:scale-90 transition-transform duration-300"
+            href="#addNewSection">
+            <span class="material-symbols-outlined" data-icon="add_circle">add_circle</span>
+            <span class="font-['Manrope'] text-[10px] uppercase tracking-widest font-semibold mt-1">Add New</span>
+        </a>
+    </nav>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -119,116 +187,6 @@
         const db = getFirestore(app);
         const collectionName = "cnation-family-birthdays";
 
-        // ───────────────────────────────────────────
-        // Service Worker 등록
-        // ───────────────────────────────────────────
-        async function registerSW() {
-            if (!('serviceWorker' in navigator)) return;
-            try {
-                const reg = await navigator.serviceWorker.register('./sw.js');
-                console.log('[SW] 등록 성공:', reg.scope);
-                return reg;
-            } catch (e) {
-                console.error('[SW] 등록 실패:', e);
-            }
-        }
-
-        // ───────────────────────────────────────────
-        // 알림 권한 요청 & 배너 처리
-        // ───────────────────────────────────────────
-        function showNotifBanner() {
-            const banner = document.getElementById('notificationBanner');
-            const dismissed = localStorage.getItem('notifBannerDismissed');
-            if (dismissed) return;
-            if (!('Notification' in window)) return;
-            if (Notification.permission === 'granted') {
-                updateNotifStatus(true);
-                return;
-            }
-            if (Notification.permission !== 'denied') {
-                banner.style.display = 'block';
-            }
-        }
-
-        function updateNotifStatus(active) {
-            const el = document.getElementById('notifStatus');
-            if (active) el.classList.remove('hidden');
-            else el.classList.add('hidden');
-        }
-
-        document.getElementById('allowNotifBtn').addEventListener('click', async () => {
-            const permission = await Notification.requestPermission();
-            document.getElementById('notificationBanner').style.display = 'none';
-            if (permission === 'granted') {
-                updateNotifStatus(true);
-                // SW에 알림 스케줄 요청
-                scheduleBirthdayChecks();
-                alert('✅ 알림이 허용되었습니다!\n생일 하루 전 오전 8시에 알림을 드릴게요.');
-            } else {
-                alert('⚠️ 알림이 거부되었습니다.\n브라우저/기기 설정에서 알림을 허용해주세요.');
-            }
-        });
-
-        document.getElementById('dismissNotifBtn').addEventListener('click', () => {
-            document.getElementById('notificationBanner').style.display = 'none';
-            localStorage.setItem('notifBannerDismissed', '1');
-        });
-
-        // ───────────────────────────────────────────
-        // 생일 알림 스케줄 – SW에 데이터 전달
-        // ───────────────────────────────────────────
-        function scheduleBirthdayChecks() {
-            if (!('serviceWorker' in navigator) || !navigator.serviceWorker.controller) return;
-            // 현재 birthdayList 데이터를 SW로 전달
-            const cached = JSON.parse(localStorage.getItem('birthdayCache') || '[]');
-            navigator.serviceWorker.controller.postMessage({
-                type: 'SCHEDULE_BIRTHDAY_CHECK',
-                birthdays: cached
-            });
-        }
-
-        // ───────────────────────────────────────────
-        // 앱 진입 시 오늘 기준 내일 생일 확인 (foreground)
-        // ───────────────────────────────────────────
-        function checkTomorrowBirthdays(birthdays) {
-            if (Notification.permission !== 'granted') return;
-
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            const tomorrow = new Date(today);
-            tomorrow.setDate(today.getDate() + 1);
-
-            birthdays.forEach(({ name, birthDate, isLunar }) => {
-                const info = calculateBirthdayInfo(birthDate, isLunar);
-                if (info.diffDays === 1) {
-                    // 오전 8시에 알림 예약
-                    const now = new Date();
-                    const target = new Date(tomorrow);
-                    target.setHours(8, 0, 0, 0);
-                    const delay = target - now;
-
-                    if (delay > 0) {
-                        const alreadyScheduled = localStorage.getItem(`notif_${name}_${tomorrow.toISOString().split('T')[0]}`);
-                        if (!alreadyScheduled) {
-                            setTimeout(() => {
-                                new Notification(`🎂 내일은 ${name}의 생일이에요!`, {
-                                    body: `${info.displayDate} - 미리 준비해 두세요 💝`,
-                                    icon: './android-chrome-192x192.png',
-                                    badge: './favicon-32x32.png',
-                                    tag: `birthday-${name}`,
-                                    requireInteraction: true
-                                });
-                            }, delay);
-                            localStorage.setItem(`notif_${name}_${tomorrow.toISOString().split('T')[0]}`, '1');
-                        }
-                    }
-                }
-            });
-        }
-
-        // ───────────────────────────────────────────
-        // 생일 계산
-        // ───────────────────────────────────────────
         function calculateBirthdayInfo(birthDateStr, isLunar) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -250,29 +208,25 @@
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             let dDayText = "";
-            let textColorClass = "";
             let opacityClass = "opacity-100";
 
             if (diffDays === 0) {
                 dDayText = "D-Day 🎉";
-                textColorClass = "text-red-500 font-bold";
             } else if (diffDays > 0) {
                 dDayText = `D-${diffDays}`;
-                textColorClass = "text-blue-600 font-bold";
             } else {
-                dDayText = `D+${Math.abs(diffDays)} (지남)`;
-                textColorClass = "text-gray-400";
-                opacityClass = "opacity-60";
+                dDayText = `D+${Math.abs(diffDays)}`;
+                opacityClass = "opacity-50 grayscale-[30%]"; // 지난 기념일 시각적 처리
             }
 
-            const displayDate = `${thisYearBirthdaySolar.getFullYear()}년 ${thisYearBirthdaySolar.getMonth() + 1}월 ${thisYearBirthdaySolar.getDate()}일`;
+            // 영어 형식의 예쁜 날짜 출력 (예: November 24, 2024)
+            const options = { year: 'numeric', month: 'long', day: '2-digit' };
+            const displayDate = thisYearBirthdaySolar.toLocaleDateString('en-US', options);
+            const originalDateStr = new Date(birthYear, birthMonth - 1, birthDay).toLocaleDateString('en-US', options);
 
-            return { dDayText, textColorClass, displayDate, diffDays, opacityClass };
+            return { dDayText, displayDate, originalDateStr, diffDays, opacityClass };
         }
 
-        // ───────────────────────────────────────────
-        // Firebase – 생일 목록 렌더
-        // ───────────────────────────────────────────
         document.getElementById('addBtn').addEventListener('click', async () => {
             const name = document.getElementById('nameInput').value;
             const date = document.getElementById('dateInput').value;
@@ -283,7 +237,12 @@
                 return;
             }
 
-            await addDoc(collection(db, collectionName), { name, birthDate: date, isLunar });
+            await addDoc(collection(db, collectionName), {
+                name: name,
+                birthDate: date,
+                isLunar: isLunar
+            });
+
             document.getElementById('nameInput').value = '';
             document.getElementById('dateInput').value = '';
             document.getElementById('isLunar').checked = false;
@@ -294,7 +253,13 @@
             listDiv.innerHTML = '';
 
             if (snapshot.empty) {
-                listDiv.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">등록된 생일이 없습니다. 아래에서 가족을 추가해 보세요!</p>';
+                listDiv.innerHTML = `
+                    <div class="md:col-span-12 h-full">
+                        <div class="border-2 border-dashed border-outline-variant rounded-2xl p-12 flex flex-col items-center justify-center text-center opacity-60 min-h-[200px]">
+                            <span class="material-symbols-outlined text-4xl mb-2" data-icon="event_note">event_note</span>
+                            <p class="font-label text-sm uppercase tracking-widest">등록된 기념일이 없습니다. 아래에서 추가해 보세요.</p>
+                        </div>
+                    </div>`;
                 return;
             }
 
@@ -302,71 +267,81 @@
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
                 const info = calculateBirthdayInfo(data.birthDate, data.isLunar);
-                birthdays.push({ id: docSnap.id, data, info });
+                birthdays.push({ id: docSnap.id, data: data, info: info });
             });
-
-            // localStorage 캐시 갱신 (SW 알림용)
-            const cache = birthdays.map(b => ({ name: b.data.name, birthDate: b.data.birthDate, isLunar: b.data.isLunar }));
-            localStorage.setItem('birthdayCache', JSON.stringify(cache));
-
-            // 내일 생일 있으면 foreground 알림 예약
-            checkTomorrowBirthdays(cache);
-
-            // SW에도 최신 데이터 전달
-            if (Notification.permission === 'granted') scheduleBirthdayChecks();
 
             birthdays.sort((a, b) => {
-                const dA = a.info.diffDays, dB = b.info.diffDays;
-                const aUp = dA >= 0, bUp = dB >= 0;
-                if (aUp && bUp) return dA - dB;
-                if (!aUp && !bUp) return dB - dA;
-                return aUp ? -1 : 1;
+                const diffA = a.info.diffDays;
+                const diffB = b.info.diffDays;
+                const isAUpcoming = diffA >= 0;
+                const isBUpcoming = diffB >= 0;
+
+                if (isAUpcoming && isBUpcoming) return diffA - diffB;
+                if (!isAUpcoming && !isBUpcoming) return diffB - diffA;
+                if (isAUpcoming && !isBUpcoming) return -1;
+                return 1;
             });
 
-            birthdays.forEach(({ id, data, info }) => {
+            birthdays.forEach((item) => {
+                const { id, data, info } = item;
                 const lunarTag = data.isLunar
-                    ? '<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full ml-2">음력</span>'
-                    : '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full ml-2">양력</span>';
+                    ? '<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider ml-2 align-middle">음력</span>'
+                    : '<span class="bg-surface-variant text-on-surface-variant px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wider ml-2 align-middle">양력</span>';
 
-                // D-1 강조
-                const isD1 = info.diffDays === 1;
-                const d1Badge = isD1 ? '<span class="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full ml-1 animate-pulse">🔔 내일!</span>' : '';
+                // D-7 이하의 임박한 기념일은 크게 (col-span-4), 나머지는 가로로 길게 (col-span-6) 배치
+                const isImminent = info.diffDays >= 0 && info.diffDays <= 7;
+                let itemHtml = "";
 
-                listDiv.innerHTML += `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border ${isD1 ? 'border-yellow-300 ring-2 ring-yellow-200' : 'border-gray-100'} flex justify-between items-center transition hover:shadow-md ${info.opacityClass}">
-                        <div>
-                            <div class="flex items-center mb-1 flex-wrap gap-1">
-                                <span class="font-bold text-gray-800 text-lg">${data.name}</span>
-                                ${lunarTag}${d1Badge}
+                if (isImminent) {
+                    itemHtml = `
+                    <div class="col-span-1 md:col-span-4 group cursor-pointer active:scale-95 transition-all duration-300 ${info.opacityClass}">
+                        <div class="bg-surface-container-lowest rounded-2xl p-8 shadow-[0_4px_40px_rgba(1,45,29,0.03)] border-l-4 border-error h-full flex flex-col justify-between">
+                            <div>
+                                <div class="flex justify-between items-start mb-8">
+                                    <div class="p-4 rounded-xl bg-error-container/20">
+                                        <span class="material-symbols-outlined text-error text-3xl" data-icon="cake">cake</span>
+                                    </div>
+                                    <span class="font-headline text-4xl font-bold text-error">${info.dDayText}</span>
+                                </div>
+                                <h3 class="text-2xl font-bold mb-2 flex items-center">${data.name} ${lunarTag}</h3>
+                                <p class="text-secondary font-medium uppercase tracking-widest text-xs">${info.displayDate}</p>
                             </div>
-                            <div class="text-xs text-gray-500">
-                                원래: ${data.birthDate} <br>
-                                올해: ${info.displayDate}
+                            <div class="mt-8 pt-6 border-t border-outline-variant/20 flex justify-end">
+                                <button onclick="deleteBirthday('${id}')" class="text-xs text-outline hover:text-error transition-colors underline underline-offset-4">삭제하기</button>
                             </div>
                         </div>
-                        <div class="flex flex-col items-end">
-                            <span class="text-xl ${info.textColorClass}">${info.dDayText}</span>
-                            <button onclick="deleteBirthday('${id}')" class="mt-2 text-xs text-red-400 hover:text-red-600 underline">삭제</button>
+                    </div>`;
+                } else {
+                    itemHtml = `
+                    <div class="col-span-1 md:col-span-6 group ${info.opacityClass}">
+                        <div class="bg-surface-container-lowest md:bg-surface-container-low rounded-2xl p-6 md:p-8 shadow-sm md:shadow-none flex items-center gap-6 hover:bg-surface-container transition-colors border border-outline-variant/10 md:border-none">
+                            <div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-surface-container-highest flex items-center justify-center relative flex-shrink-0">
+                                <span class="material-symbols-outlined text-3xl md:text-4xl text-primary" data-icon="event">event</span>
+                                <div class="absolute -top-1 -right-1 md:-top-2 md:-right-2 bg-primary text-on-primary text-[10px] font-black min-w-[2.5rem] h-10 rounded-full flex items-center justify-center px-2 shadow-md">${info.dDayText}</div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg md:text-xl font-bold mb-1 truncate flex items-center">${data.name} ${lunarTag}</h3>
+                                <p class="text-on-surface-variant font-body mb-3 text-xs md:text-sm truncate">원래: ${data.birthDate}</p>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-2 text-secondary font-bold text-xs md:text-sm">
+                                        <span class="material-symbols-outlined text-sm" data-icon="schedule">schedule</span>
+                                        ${info.displayDate}
+                                    </div>
+                                    <button onclick="deleteBirthday('${id}')" class="text-xs text-outline hover:text-error transition-colors underline underline-offset-4">삭제</button>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    </div>`;
+                }
+                listDiv.innerHTML += itemHtml;
             });
         });
 
         window.deleteBirthday = async (id) => {
-            if (confirm("이 생일 기록을 삭제하시겠습니까?")) {
+            if (confirm("이 기록을 삭제하시겠습니까?")) {
                 await deleteDoc(doc(db, collectionName, id));
             }
         };
-
-        // ───────────────────────────────────────────
-        // 초기화
-        // ───────────────────────────────────────────
-        await registerSW();
-        showNotifBanner();
-
-        // 이미 허용된 경우 상태 표시
-        if (Notification.permission === 'granted') updateNotifStatus(true);
     </script>
 </body>
 
