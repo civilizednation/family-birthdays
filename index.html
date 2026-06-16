@@ -26,21 +26,22 @@
 
     <div class="max-w-md mx-auto shadow-lg overflow-hidden rounded-2xl">
         <div class="bg-blue-500 text-white p-6 text-center rounded-t-2xl">
-            <h1 class="text-2xl font-bold mb-2">우리 가족 생일 알림이 🎂</h1>
-            <p class="text-blue-100 text-sm">올해 생일, 며칠 남았을까?</p>
+            <h1 class="text-2xl font-bold mb-2">우리 가족 일정 알림이 🎂</h1>
+            <p class="text-blue-100 text-sm">중요한 날, 며칠 남았을까?</p>
         </div>
 
         <div class="p-6 bg-gray-50 min-h-[300px]">
-            <h2 class="text-lg font-bold text-gray-700 mb-4">다가오는 생일 목록</h2>
+            <h2 class="text-lg font-bold text-gray-700 mb-4">다가오는 일정 목록</h2>
             <div id="birthdayList" class="space-y-3">
                 <p class="text-center text-gray-400 text-sm py-4">데이터를 불러오는 중입니다...</p>
             </div>
         </div>
 
         <div class="p-6 bg-white border-t border-gray-200 rounded-b-2xl">
-            <h2 class="text-sm font-bold text-gray-500 mb-4">새로운 가족 추가하기</h2>
+            <h2 class="text-sm font-bold text-gray-500 mb-4">새로운 일정 추가하기</h2>
             <div class="flex flex-col space-y-3">
-                <input type="text" id="nameInput" placeholder="이름 (예: 첫째 아들, 아내)"
+
+                <input type="text" id="nameInput" placeholder="이름 또는 일정 (예: 아내 생일, 문성현 전역)"
                     class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400">
 
                 <div class="flex space-x-2 items-center">
@@ -51,6 +52,18 @@
                         <input type="checkbox" id="isLunar" class="w-4 h-4 text-blue-500 rounded focus:ring-blue-400">
                         <span>음력</span>
                     </label>
+                </div>
+
+                <!-- 반복 여부 선택 -->
+                <div class="flex rounded-lg overflow-hidden border border-gray-300">
+                    <button id="btnYearly" onclick="setRepeat(true)"
+                        class="flex-1 py-2 text-sm font-medium bg-blue-500 text-white transition">
+                        🔁 매년 반복
+                    </button>
+                    <button id="btnOnce" onclick="setRepeat(false)"
+                        class="flex-1 py-2 text-sm font-medium bg-white text-gray-500 transition">
+                        📅 일회성
+                    </button>
                 </div>
 
                 <button id="addBtn"
@@ -77,55 +90,80 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-
         const collectionName = "cnation-family-birthdays";
 
-        function getSolarBirthday(year, month, day, isLunar) {
+        // 반복 여부 상태
+        let isYearly = true;
+
+        window.setRepeat = function(yearly) {
+            isYearly = yearly;
+            const btnYearly = document.getElementById('btnYearly');
+            const btnOnce = document.getElementById('btnOnce');
+            if (yearly) {
+                btnYearly.className = 'flex-1 py-2 text-sm font-medium bg-blue-500 text-white transition';
+                btnOnce.className = 'flex-1 py-2 text-sm font-medium bg-white text-gray-500 transition';
+            } else {
+                btnYearly.className = 'flex-1 py-2 text-sm font-medium bg-white text-gray-500 transition';
+                btnOnce.className = 'flex-1 py-2 text-sm font-medium bg-blue-500 text-white transition';
+            }
+        };
+
+        function getSolarDate(year, month, day, isLunar) {
             if (isLunar) {
                 const lunarDate = Lunar.fromYmd(year, month, day);
-                const solarDateObj = lunarDate.getSolar();
-                return new Date(solarDateObj.getYear(), solarDateObj.getMonth() - 1, solarDateObj.getDay());
-            } else {
-                return new Date(year, month - 1, day);
+                const s = lunarDate.getSolar();
+                return new Date(s.getYear(), s.getMonth() - 1, s.getDay());
             }
+            return new Date(year, month - 1, day);
         }
 
-        function calculateBirthdayInfo(birthDateStr, isLunar) {
+        function calculateEventInfo(birthDateStr, isLunar, yearly) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
-            const [birthYear, birthMonth, birthDay] = birthDateStr.split('-').map(Number);
+            const [origYear, origMonth, origDay] = birthDateStr.split('-').map(Number);
             const currentYear = today.getFullYear();
 
-            // 올해 생일 계산
-            let targetBirthday = getSolarBirthday(currentYear, birthMonth, birthDay, isLunar);
+            let targetDate;
 
-            // 올해 생일이 이미 지났으면 내년으로 재계산
-            if (targetBirthday < today) {
-                targetBirthday = getSolarBirthday(currentYear + 1, birthMonth, birthDay, isLunar);
+            if (yearly) {
+                // 매년 반복: 올해 날짜 계산 후 지났으면 내년으로
+                targetDate = getSolarDate(currentYear, origMonth, origDay, isLunar);
+                if (targetDate < today) {
+                    targetDate = getSolarDate(currentYear + 1, origMonth, origDay, isLunar);
+                }
+            } else {
+                // 일회성: 원래 연도 그대로 사용
+                targetDate = getSolarDate(origYear, origMonth, origDay, isLunar);
             }
 
-            const diffTime = targetBirthday - today;
+            const diffTime = targetDate - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
             let dDayText = "";
             let textColorClass = "";
+            let opacityClass = "opacity-100";
 
             if (diffDays === 0) {
                 dDayText = "D-Day 🎉";
                 textColorClass = "text-red-500 font-bold";
-            } else {
+            } else if (diffDays > 0) {
                 dDayText = `D-${diffDays}`;
                 textColorClass = "text-blue-600 font-bold";
+            } else {
+                // 일회성이고 이미 지난 경우
+                dDayText = `D+${Math.abs(diffDays)}`;
+                textColorClass = "text-gray-400";
+                opacityClass = "opacity-50";
             }
 
-            const displayDate = `${targetBirthday.getFullYear()}년 ${targetBirthday.getMonth() + 1}월 ${targetBirthday.getDate()}일`;
+            const displayDate = `${targetDate.getFullYear()}년 ${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일`;
 
-            return { dDayText, textColorClass, displayDate, diffDays };
+            return { dDayText, textColorClass, displayDate, diffDays, opacityClass };
         }
 
         document.getElementById('addBtn').addEventListener('click', async () => {
-            const name = document.getElementById('nameInput').value;
+            const name = document.getElementById('nameInput').value.trim();
             const date = document.getElementById('dateInput').value;
             const isLunar = document.getElementById('isLunar').checked;
 
@@ -137,12 +175,14 @@
             await addDoc(collection(db, collectionName), {
                 name: name,
                 birthDate: date,
-                isLunar: isLunar
+                isLunar: isLunar,
+                yearly: isYearly
             });
 
             document.getElementById('nameInput').value = '';
             document.getElementById('dateInput').value = '';
             document.getElementById('isLunar').checked = false;
+            setRepeat(true); // 기본값으로 리셋
         });
 
         onSnapshot(collection(db, collectionName), (snapshot) => {
@@ -150,41 +190,55 @@
             listDiv.innerHTML = '';
 
             if (snapshot.empty) {
-                listDiv.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">등록된 생일이 없습니다. 아래에서 가족을 추가해 보세요!</p>';
+                listDiv.innerHTML = '<p class="text-center text-gray-400 text-sm py-4">등록된 일정이 없습니다. 아래에서 추가해 보세요!</p>';
                 return;
             }
 
-            let birthdays = [];
+            let events = [];
             snapshot.forEach((docSnap) => {
                 const data = docSnap.data();
-                const info = calculateBirthdayInfo(data.birthDate, data.isLunar);
-                birthdays.push({ id: docSnap.id, data: data, info: info });
+                // yearly 필드가 없는 기존 데이터는 매년 반복으로 처리
+                const yearly = data.yearly !== undefined ? data.yearly : true;
+                const info = calculateEventInfo(data.birthDate, data.isLunar, yearly);
+                events.push({ id: docSnap.id, data: { ...data, yearly }, info });
             });
 
-            // 항상 D-day 오름차순 정렬 (D-0이 제일 위, D-364가 제일 아래)
-            birthdays.sort((a, b) => a.info.diffDays - b.info.diffDays);
+            // 정렬: 앞으로 남은 것 오름차순 → 지난 것 (최근 지난 것 먼저)
+            events.sort((a, b) => {
+                const isAFuture = a.info.diffDays >= 0;
+                const isBFuture = b.info.diffDays >= 0;
+                if (isAFuture && isBFuture) return a.info.diffDays - b.info.diffDays;
+                if (!isAFuture && !isBFuture) return b.info.diffDays - a.info.diffDays;
+                return isAFuture ? -1 : 1;
+            });
 
-            birthdays.forEach((item) => {
+            events.forEach((item) => {
                 const { id, data, info } = item;
+
                 const lunarTag = data.isLunar
                     ? '<span class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full ml-2">음력</span>'
                     : '<span class="text-xs bg-gray-200 text-gray-700 px-2 py-1 rounded-full ml-2">양력</span>';
 
+                const repeatTag = data.yearly
+                    ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-1">매년</span>'
+                    : '<span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full ml-1">일회</span>';
+
                 const itemHtml = `
-                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md">
+                    <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md ${info.opacityClass}">
                         <div>
-                            <div class="flex items-center mb-1">
+                            <div class="flex items-center flex-wrap mb-1">
                                 <span class="font-bold text-gray-800 text-lg">${data.name}</span>
                                 ${lunarTag}
+                                ${repeatTag}
                             </div>
                             <div class="text-xs text-gray-500">
-                                생일: ${data.birthDate} <br>
-                                다음: ${info.displayDate}
+                                날짜: ${data.birthDate} <br>
+                                ${data.yearly ? '다음' : '예정'}: ${info.displayDate}
                             </div>
                         </div>
                         <div class="flex flex-col items-end">
                             <span class="text-xl ${info.textColorClass}">${info.dDayText}</span>
-                            <button onclick="deleteBirthday('${id}')" class="mt-2 text-xs text-red-400 hover:text-red-600 underline">삭제</button>
+                            <button onclick="deleteEvent('${id}')" class="mt-2 text-xs text-red-400 hover:text-red-600 underline">삭제</button>
                         </div>
                     </div>
                 `;
@@ -192,8 +246,8 @@
             });
         });
 
-        window.deleteBirthday = async (id) => {
-            if (confirm("이 생일 기록을 삭제하시겠습니까?")) {
+        window.deleteEvent = async (id) => {
+            if (confirm("이 일정을 삭제하시겠습니까?")) {
                 await deleteDoc(doc(db, collectionName, id));
             }
         };
