@@ -117,6 +117,10 @@
             return new Date(year, month - 1, day);
         }
 
+        function formatDate(d) {
+            return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일`;
+        }
+
         function calculateEventInfo(birthDateStr, isLunar, yearly) {
             const today = new Date();
             today.setHours(0, 0, 0, 0);
@@ -157,9 +161,17 @@
                 opacityClass = "opacity-50";
             }
 
-            const displayDate = `${targetDate.getFullYear()}년 ${targetDate.getMonth() + 1}월 ${targetDate.getDate()}일`;
+            const displayDate = formatDate(targetDate);
 
-            return { dDayText, textColorClass, displayDate, diffDays, opacityClass };
+            // 음력인 경우, 원래 등록된 날짜(원년도 기준)의 양력 변환 날짜도 계산
+            // "날짜:" 줄에 음력 원본 대신 양력 변환 날짜 + (양력) 표시를 위해 사용
+            let originalSolarDisplay = null;
+            if (isLunar) {
+                const origSolarDate = getSolarDate(origYear, origMonth, origDay, true);
+                originalSolarDisplay = formatDate(origSolarDate);
+            }
+
+            return { dDayText, textColorClass, displayDate, diffDays, opacityClass, originalSolarDisplay };
         }
 
         document.getElementById('addBtn').addEventListener('click', async () => {
@@ -223,6 +235,11 @@
                     ? '<span class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full ml-1">매년</span>'
                     : '<span class="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full ml-1">일회</span>';
 
+                // 음력인 경우 원본 날짜 줄을 양력 변환 날짜 + (양력) 표시로 대체
+                const baseDateDisplay = data.isLunar
+                    ? `${info.originalSolarDisplay} (양력)`
+                    : data.birthDate;
+
                 const itemHtml = `
                     <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center transition hover:shadow-md ${info.opacityClass}">
                         <div>
@@ -232,7 +249,7 @@
                                 ${repeatTag}
                             </div>
                             <div class="text-xs text-gray-500">
-                                날짜: ${data.birthDate} <br>
+                                날짜: ${baseDateDisplay} <br>
                                 ${data.yearly ? '다음' : '예정'}: ${info.displayDate}
                             </div>
                         </div>
